@@ -8,8 +8,8 @@
 ## I will start by getting the Weather API connections set up in order to display this data for the users to view information on the weather. I will use Flask to create this project.
 
 ## Example Execution Plan:
-- By the end of Week 4/Week 5: set up my web application and get my API key; if this API does not work for my needs, I will try to find another weather API to get access to this data for my application
+- By the end of Week 4/Week 5: set up my web application to print 'Hello World' and get a working API key; if this API does not work for my needs, I will try to find another weather API to get access to this data for my application
 - By the end of Week 6: Implement the methods that return weather data, including forecast and current weather, for a specific location
-- By the end of Week 7: Implement the methods that gives historical data for a given city and allow for users to save and view multiple cities’ weather data 
-- By the end of Week 8: Launch a local web app where people can use my Weather application and troubleshoot and debug any bugs
-- By the end of Week 9: Users should be able to use my Weather application!
+- By the end of Week 7: Implement the methods that gives historical data for a given city  
+- By the end of Week 8: Implement a way for users to save and view multiple cities’ weather data
+- By the end of Week 9: Launch a local web app where people can use my Weather application and troubleshoot and debug any bugs. Users should be able to use my Weather application!
