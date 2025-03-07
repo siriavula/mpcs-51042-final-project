@@ -5,26 +5,12 @@ from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
+api_key = '92eae2a76e7041fe86800920250303'
 BASE_URL_CURRENT = 'http://api.weatherapi.com/v1/current.json'
 BASE_URL_FORECAST = 'http://api.weatherapi.com/v1/forecast.json'
 BASE_URL_HISTORICAL = 'https://api.weatherapi.com/v1/history.json'
 
-api_key = '92eae2a76e7041fe86800920250303'
 cities = []
-
-
-def get_weather_data(location, date):
-    formatted_date = date.strftime('%Y-%m-%d')
-
-    params = {
-        'key': api_key,
-        'q': location,
-        'dt': formatted_date
-    }
-    response = requests.get(BASE_URL_HISTORICAL, params=params)
-
-    # Return data as a dictionary
-    return response.json()
 
 
 @app.route('/')
@@ -100,26 +86,24 @@ def tab1():
 
 @app.route('/tab2', methods=['GET', 'POST'])
 def tab2():
-    weather_data = None
+    data = None
     location = ''
     date = None
 
     if request.method == 'POST':
-        # Get the location and date from the form
         location = request.form.get('location')
         date_str = request.form.get('date')
 
-        # Convert the date string to a datetime object
-        try:
-            date = datetime.strptime(
-                date_str, '%Y-%m-%d') if date_str else datetime.today()
-        except ValueError:
-            date = datetime.today()  # If invalid date, use today's date
+        if date_str:
+            date = datetime.strptime(date_str, '%Y-%m-%d')
+        else:
+            date = datetime.today()
 
-        # Get the historical weather data
-        weather_data = get_weather_data(location, date)
+        response = requests.get(BASE_URL_HISTORICAL, params={
+            'key': api_key, 'q': location, 'dt': date.strftime('%Y-%m-%d')})
+        data = response.json()
 
-    return render_template('index.html', weather_data=weather_data, location=location, date=date, active_tab='Tab2')
+    return render_template('index.html', data=data, location=location, date=date, active_tab='Tab2')
 
 
 @app.route('/tab3', methods=['GET', 'POST'])
@@ -129,18 +113,12 @@ def tab3():
 
     if request.method == 'POST':
         city = request.form.get('city')
-
-        params_current = {
-            'key': api_key,
-            'q': city,
-        }
-
-        response = requests.get(BASE_URL_FORECAST, params=params_current)
+        response = requests.get(BASE_URL_FORECAST, params={
+                                'key': api_key, 'q': city, })
         response_data = response.json()
 
         if response.status_code == 200:
             current_weather = response_data['current']
-
             weather = {
                 'city': response_data['location']['name'],
                 'local_time': response_data['location']['localtime'],
@@ -152,14 +130,11 @@ def tab3():
                 'feels_like_c': current_weather['feelslike_c'],
                 'feels_like_f': current_weather['feelslike_f'],
             }
-
             cities.append(weather)
-
         else:
             error = response_data.get('error', {}).get(
-                'message', 'Unknown error')
-
-    return render_template('index.html', cities=cities, error=error, active_tab='Tab3', clear=clear)
+                'message', 'error unknown')
+    return render_template('index.html', cities=cities, error=error, active_tab='Tab3')
 
 
 if __name__ == '__main__':
