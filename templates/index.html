@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather App</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <h1>Weather</h1>
+      <div class="tab">
+        <button class="tablinks" onclick="openTab(event, 'Tab1')" 
+          {% if active_tab == 'Tab1' %} class="active" {% endif %}>Tab 1</button>
+        <button class="tablinks" onclick="openTab(event, 'Tab2')" 
+          {% if active_tab == 'Tab2' %} class="active" {% endif %}>Tab 2</button>
+        <button class="tablinks" onclick="openTab(event, 'Tab3')" 
+          {% if active_tab == 'Tab3' %} class="active" {% endif %}>Tab 3</button>
+      </div>
+
+
+      <div id="Tab1" class="tabcontent">
+        <div class="container">
+    
+          <form method="POST" action='/tab1'>
+            <label for="city">Enter City:</label>
+            <input type="text" name="city" id="city" required />
+            <button type="submit">Get Current Weather</button>
+          </form>
+          
+          {% if weather %}
+          <div class="weather">
+            <h2>Current Weather in {{ weather.city }}:</h2>
+            <p>Temperature: {{ weather.temperature_f }}°C / {{ weather.temperature_f }}°F</p>
+            <p>Feels Like: {{ weather.feels_like_c }}°C / {{ weather.feels_like_f }}°F</p>
+            <p>Condition: {{ weather.condition }}</p>
+            <p>Wind Speed: {{ weather.wind_speed_kph }} kph / {{ weather.wind_speed_mph }} mph </p>
+          </div>
+          {% for day in forecast %}
+          <div class="forecast-item">
+              <p class="date">{{ day.date }}</p>
+              <img src="https:{{ day.condition_icon }}" alt="Weather Icon">
+              <h3>{{ day.avg_temp }}°C</h3>
+              <p>Max: {{ day.max_temp }}°C, Min: {{ day.min_temp }}°C</p>
+              <p>{{ day.condition_text }}</p>
+              <p>Wind Speed: {{ day.wind_speed }} km/h</p>
+              <p>Humidity: {{ day.humidity }}%</p>
+          </div>
+          {% endfor %}
+          {% elif error %}
+          <div class="error">
+            <p>{{ error }}</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div id="Tab2" class="tabcontent">
+        <h1>Historical Data (up to past 7 days)</h1>
+        <form method="POST" action='/tab2'>
+          <label for="location">Enter City: </label>
+          <input type="text" id="location" name="location" value="{{ location }}" required>
+          <br><br>
+          
+          <label for="date">Pick Date: </label>
+          <input type="date" id="date" name="date" value="{{ date.strftime('%Y-%m-%d') if date else '' }}" required>
+          <br><br>
+          
+          <button type="submit">Get Historical Data</button>
+        </form>
+  
+        <!-- {% if weather_data %}
+          <h2>Weather Data for {{ location }} on {{ date.strftime('%Y-%m-%d') }}</h2>
+          <p><strong>Temperature:</strong> {{ weather_data['forecast']['forecastday'][0]['day']['avgtemp_c'] }} °C</p>
+          <p><strong>Humidity:</strong> {{ weather_data['forecast']['forecastday'][0]['day']['avghumidity'] }} %</p>
+          <p><strong>Condition:</strong> {{ weather_data['forecast']['forecastday'][0]['day']['condition']['text'] }}</p>
+          <p><strong>Sunrise:</strong> {{ weather_data['forecast']['forecastday'][0]['astro']['sunrise'] }}</p>
+          <p><strong>Sunset:</strong> {{ weather_data['forecast']['forecastday'][0]['astro']['sunset'] }}</p>
+        {% endif %} -->
+
+        {% if weather_data %}
+          <h2>Weather Data for {{ location }} on {{ date.strftime('%Y-%m-%d') }}</h2>
+          <p><strong>Temperature:</strong> {{ weather_data['forecast']['forecastday'][0]['day']['avgtemp_c'] }} °C</p>
+          <p><strong>Humidity:</strong> {{ weather_data['forecast']['forecastday'][0]['day']['avghumidity'] }} %</p>
+          <p><strong>Condition:</strong> {{ weather_data['forecast']['forecastday'][0]['day']['condition']['text'] }}</p>
+          <p><strong>Sunrise:</strong> {{ weather_data['forecast']['forecastday'][0]['astro']['sunrise'] }}</p>
+          <p><strong>Sunset:</strong> {{ weather_data['forecast']['forecastday'][0]['astro']['sunset'] }}</p>
+        {% else %}
+          <p>No weather data available. Please check your inputs or try again later.</p>
+        {% endif %}
+
+      </div>
+      
+      <div id="Tab3" class="tabcontent">
+        <h1>Weather Globally</h1>
+        <form method="POST" action='/tab3'>
+          <label for="city">Search for a city: </label>
+          <input type="text" name="city" id="city" required />
+          <button type="submit">Click to View</button>
+        </form>
+
+        {% for city in cities %}
+          <h2>{{city['city']}}</h2>
+          <div>
+            <p>Temperature: {{ city.temperature_f }}°C / {{ city.temperature_f }}°F</p>
+            <p>Feels Like: {{ city.feels_like_c }}°C / {{ city.feels_like_f }}°F</p>
+            <p>Condition: {{ city.condition }}</p>
+            <p>Wind Speed: {{ city.wind_speed_kph }} kph / {{ city.wind_speed_mph }} mph </p>
+          </div>
+        {% endfor %}
+
+        
+
+
+      </div>
+
+      <script>
+        function openTab(evt, tabName) {
+          var i, tabcontent, tablinks;
+          tabcontent = document.getElementsByClassName("tabcontent");
+          for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+          }
+          tablinks = document.getElementsByClassName("tablinks");
+          for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+          }
+          document.getElementById(tabName).style.display = "block";
+          evt.currentTarget.className += " active";
+        }
+      
+        // Ensure correct tab is open based on the 'active_tab' variable passed from Flask
+        document.addEventListener("DOMContentLoaded", function() {
+          const activeTab = "{{ active_tab if active_tab else 'Tab1' }}"; // Default to Tab1 if no active_tab is set
+          const event = { currentTarget: document.querySelector(`.tablinks[onclick="openTab(event, '${activeTab}')"]`) };
+          openTab(event, activeTab);
+        });
+      </script>
+  </body>
+</html> 
