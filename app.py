@@ -89,17 +89,6 @@ def currentandforecast():
     return render_template('index.html', weather=weather, forecast=forecast, error=error, active_tab='currentandforecast')
 
 
-def get_iresponse_data(url, params):
-    response = requests.get(url, params=params)
-    response_data = response.json()
-
-    if response.status_code == 200:
-        return True, response_data
-    else:
-        return None, response_data.get('error', {}).get(
-            'message', 'Unknown error')
-
-
 @app.route('/historical', methods=['GET', 'POST'])
 def historical():
     data = None
