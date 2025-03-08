@@ -64,6 +64,19 @@
       .form-flex {
         display: flex;
       }
+
+      .forecast-container-one {
+        display: flex;            
+        flex-wrap: nowrap;         
+        overflow-x: auto;      
+      }
+      .forecast-container-two {
+        display: flex;            
+        flex-wrap: nowrap;         
+        overflow-x: auto;      
+        flex-direction: column;  
+      }
+
     </style>
   </head>
   <body>
@@ -87,26 +100,33 @@
             <button type="submit">Get Current Weather</button>
           </form>
           
-          {% if weather %}
-          <div class="weather">
-            <h3>Current Weather in {{ weather.city }}:</h3>
-            <p>Temperature: {{ weather.temperature_f }}°C / {{ weather.temperature_f }}°F</p>
-            <p>Feels Like: {{ weather.feels_like_c }}°C / {{ weather.feels_like_f }}°F</p>
-            <p>Condition: {{ weather.condition }}</p>
-            <p>Wind Speed: {{ weather.wind_speed_kph }} kph / {{ weather.wind_speed_mph }} mph </p>
+          {% if weather and forecast %}
+          <h3>Current Weather in {{ weather.city }}:</h3>
+          <div class="forecast-container-one">
+              <img src="https:{{ weather.condition_img }}" alt="Weather Icon">
+              <h3>Temperature: {{ weather.temperature_f }}°C / {{ weather.temperature_f }}°F </h3>
           </div>
-
+          <div class="forecast-container-two">
+            <p>Feels Like: {{ weather.feels_like_c }}°C / {{ weather.feels_like_f }}°F </p>
+            <p>Condition: {{ weather.condition }} </p>
+            <p>Wind Speed: {{ weather.wind_speed_kph }} kph / {{ weather.wind_speed_mph }} mph </p>
+            <p>Humidity: {{ weather.humidity }} </p>
+          </div>
+          <h2>Weekly Forecast</h2>
           {% for day in forecast %}
-          <div class="forecast-item">
-              <p class="date">{{ day.date }}</p>
+          <p style="margin: 10px; font-size: 20px; color: #b87a83;" class="date">{{ day.date }}</p>
+          <div class="forecast-container-one">
               <img src="https:{{ day.condition_icon }}" alt="Weather Icon">
-              <h3>{{ day.avg_temp }}°C</h3>
+              <h3>Average Temperature: {{ day.avg_temp }}°C</h3>
+          </div>
+          <div class="forecast-container-two">
               <p>Max: {{ day.max_temp }}°C, Min: {{ day.min_temp }}°C</p>
               <p>{{ day.condition_text }}</p>
               <p>Wind Speed: {{ day.wind_speed }} km/h</p>
               <p>Humidity: {{ day.humidity }}%</p>
           </div>
           {% endfor %}
+
           {% elif error %}
           <div class="error">
             <p>{{ error }}</p>
@@ -165,13 +185,16 @@
           {% if invalid %}
           <p> {{invalid}} </p>
           {% endif %}
+
           {% for city in cities %}
             <h3>{{city['city']}}</h3>
             <div>
-              <p>Temperature: {{ city.temperature_f }}°C / {{ city.temperature_f }}°F</p>
-              <p>Feels Like: {{ city.feels_like_c }}°C / {{ city.feels_like_f }}°F</p>
-              <p>Condition: {{ city.condition }}</p>
+              <p>Temperature: {{ city.temperature_f }} C / {{ city.temperature_f }} F</p>
+              <p>Feels Like: {{ city.feels_like_c }} C / {{ city.feels_like_f }} F</p>
               <p>Wind Speed: {{ city.wind_speed_kph }} kph / {{ city.wind_speed_mph }} mph </p>
+              <p>Condition: {{ city.condition }}</p>
+              <p>Wind Chill: {{ city.wind_chill_c }} C / {{ city.wind_chill_f }} F </p>
+              <p>Humidity: {{ city.humidity }}</p>
             </div>
           {% endfor %}
 

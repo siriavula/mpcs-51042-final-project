@@ -36,10 +36,13 @@ def get_current_weather_data(data, weather):
         'temperature_f': current_weather['temp_f'],
         'temperature_c': current_weather['temp_c'],
         'condition': current_weather['condition']['text'],
+        'condition_img': current_weather['condition']['icon'],
         'wind_speed_kph': current_weather['wind_kph'],
         'wind_speed_mph': current_weather['wind_mph'],
         'feels_like_c': current_weather['feelslike_c'],
         'feels_like_f': current_weather['feelslike_f'],
+        'humidity': current_weather['humidity']
+
     }
     return weather
 
