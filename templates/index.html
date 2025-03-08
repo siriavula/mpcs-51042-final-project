@@ -8,19 +8,19 @@
   <body>
     <h1>Weather</h1>
       <div class="tab">
-        <button class="tablinks" onclick="openTab(event, 'currentandforecast')" 
-          {% if active_tab == 'currentandforecast' %} class="active" {% endif %}>Weather</button>
+        <button class="tablinks" onclick="openTab(event, 'current_and_forecast')" 
+          {% if active_tab == 'current_and_forecast' %} class="active" {% endif %}>Weather</button>
         <button class="tablinks" onclick="openTab(event, 'historical')" 
           {% if active_tab == 'historical' %} class="active" {% endif %}>Historical</button>
-        <button class="tablinks" onclick="openTab(event, 'Tab3')" 
-          {% if active_tab == 'Tab3' %} class="active" {% endif %}>Multiple Cities</button>
+        <button class="tablinks" onclick="openTab(event, 'multiple_cities_data')" 
+          {% if active_tab == 'multiple_cities_data' %} class="active" {% endif %}>Multiple Cities</button>
       </div>
 
       <!-- Tab 1 -->
-      <div id="currentandforecast" class="tabcontent">
+      <div id="current_and_forecast" class="tabcontent">
         <div class="container">
     
-          <form method="POST" action='/currentandforecast'>
+          <form method="POST" action='/current_and_forecast'>
             <label for="city">Enter City:</label>
             <input type="text" name="city" id="city" required />
             <button type="submit">Get Current Weather</button>
@@ -85,9 +85,9 @@
         {% endif %}
       </div>
 
-      <div id="Tab3" class="tabcontent">
+      <div id="multiple_cities_data" class="tabcontent">
         <h1>Weather Globally</h1>
-        <form method="POST" action='/tab3'>
+        <form method="POST" action='/multiple_cities_data'>
           <label for="city">Search for a city: </label>
           <input type="text" name="city" id="city" required />
           <button type="submit">Click to View</button>
@@ -128,7 +128,7 @@
         }
       
         document.addEventListener("DOMContentLoaded", function() {
-          const activeTab = "{{ active_tab if active_tab else 'currentandforecast' }}"; 
+          const activeTab = "{{ active_tab if active_tab else 'current_and_forecast' }}"; 
           const event = { currentTarget: document.querySelector(`.tablinks[onclick="openTab(event, '${activeTab}')"]`) };
           openTab(event, activeTab);
         });
