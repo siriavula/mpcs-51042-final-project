@@ -103,7 +103,7 @@
           {% if weather and forecast %}
           <h3>Current Weather in {{ weather.city }}:</h3>
           <div class="forecast-container-one">
-              <img src="https:{{ weather.condition_img }}" alt="Weather Icon">
+              <img src="https:{{ weather.condition_img }}" alt="Condition">
               <h3>Temperature: {{ weather.temperature_f }}°C / {{ weather.temperature_f }}°F </h3>
           </div>
           <div class="forecast-container-two">
@@ -154,11 +154,11 @@
           {% endif %}
           {% if data %}
             <h3>{{ location }} </h3>
-            <p><strong>Temperature:</strong> {{ data['forecast']['forecastday'][0]['day']['avgtemp_c'] }} °C</p>
-            <p><strong>Humidity:</strong> {{ data['forecast']['forecastday'][0]['day']['avghumidity'] }} %</p>
-            <p><strong>Condition:</strong> {{ data['forecast']['forecastday'][0]['day']['condition']['text'] }}</p>
-            <p><strong>Sunrise:</strong> {{ data['forecast']['forecastday'][0]['astro']['sunrise'] }}</p>
-            <p><strong>Sunset:</strong> {{ data['forecast']['forecastday'][0]['astro']['sunset'] }}</p>
+            <p><strong>Temperature:</strong> {{ data['temperature_c'] }}°C / {{ data['temperature_f'] }}°F</p>
+            <p><strong>Condition:</strong> {{ data['condition'] }}</p>
+            <p><strong>Max:</strong> {{ data['max_temperature_c'] }}°C / {{ data['max_temperature_f'] }}°F</p>
+            <p><strong>Min:</strong> {{ data['min_temperature_c'] }}°C / {{ data['min_temperature_f'] }}°F</p>
+            <p><strong>Humidity:</strong> {{ data['humidity'] }}%</p>
           {% elif error %}
             <div class="error">
               <p>{{ error }}</p>

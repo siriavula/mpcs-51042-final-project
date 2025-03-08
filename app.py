@@ -85,8 +85,24 @@ def current_and_forecast():
     return render_template('index.html', weather=weather, forecast=forecast, error=error, active_tab='current_and_forecast')
 
 
+def get_historical_data(data, weather):
+    weather = {
+        'temperature_c': data['forecast']['forecastday'][0]['day']['avgtemp_c'],
+        'temperature_f': data['forecast']['forecastday'][0]['day']['avgtemp_f'],
+        'max_temperature_f': data['forecast']['forecastday'][0]['day']['maxtemp_f'],
+        'max_temperature_c': data['forecast']['forecastday'][0]['day']['maxtemp_c'],
+        'min_temperature_f': data['forecast']['forecastday'][0]['day']['mintemp_f'],
+        'min_temperature_c': data['forecast']['forecastday'][0]['day']['mintemp_c'],
+        'humidity': data['forecast']['forecastday'][0]['day']['avghumidity'],
+        'condition': data['forecast']['forecastday'][0]['day']['condition']['text'],
+        'condition_img': data['forecast']['forecastday'][0]['day']['condition']['icon'],
+    }
+    return weather
+
+
 @app.route('/historical', methods=['GET', 'POST'])
 def historical():
+    weather = None
     data = None
     location = ''
     date = None
@@ -112,7 +128,7 @@ def historical():
         if not err:
             error = response_data
         else:
-            data = response_data
+            data = get_historical_data(response_data, weather)
 
     return render_template('index.html', data=data, date_valid=date_valid, error=error, location=location, date=date, active_tab='historical')
 
