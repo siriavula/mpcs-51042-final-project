@@ -4,22 +4,83 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Weather App</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      h1 {
+        text-align: center;
+        color: #FFB6C1;
+      }
+
+      h2 {
+        color: #fba3b0;
+      }
+
+    
+      .tab {
+        display: flex;
+        justify-content: center;
+        background-color: rgb(255, 255, 255);
+        /* padding: 10px; */
+      } 
+    
+      .tab button {
+        background-color: #ffffff;
+        padding: 10px 20px;
+        font-size: 16px;
+        /* margin-top: 5vh; */
+      }
+   
+      .tab button:hover, .tab button.active {
+        background-color: #FFB6C1;
+        color: white;
+      }
+     
+      .tabcontent {
+        display: none;
+        padding: 20px;
+        background-color: white;
+        /* margin-top: 20px;
+        border-radius: 5px; */
+      }
+ 
+      .container button {
+        background-color: #f1f1f1;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        font-size: 16px;
+        margin: 0 5px;
+        transition: background-color 0.3s ease;
+      }
+   
+      .container button:hover, .tab button.active {
+        background-color: #FFB6C1;
+        color: white;
+      }
+
+      .form-flex {
+        display: flex;
+      }
+    </style>
   </head>
   <body>
-    <h1>Weather</h1>
+      <h1>Weather</h1>
       <div class="tab">
         <button class="tablinks" onclick="openTab(event, 'current_and_forecast')" 
-          {% if active_tab == 'current_and_forecast' %} class="active" {% endif %}>Weather</button>
+          {% if active_tab == 'current_and_forecast' %} class="active" {% endif %}>Current Weather</button>
         <button class="tablinks" onclick="openTab(event, 'historical')" 
-          {% if active_tab == 'historical' %} class="active" {% endif %}>Historical</button>
+          {% if active_tab == 'historical' %} class="active" {% endif %}>Historical Data</button>
         <button class="tablinks" onclick="openTab(event, 'multiple_cities_data')" 
-          {% if active_tab == 'multiple_cities_data' %} class="active" {% endif %}>Multiple Cities</button>
+          {% if active_tab == 'multiple_cities_data' %} class="active" {% endif %}>View/Save Multiple Cities</button>
       </div>
 
       <!-- Tab 1 -->
       <div id="current_and_forecast" class="tabcontent">
         <div class="container">
-    
+          <h2>Get Current Weather and Weekly Forecast</h2>
           <form method="POST" action='/current_and_forecast'>
             <label for="city">Enter City:</label>
             <input type="text" name="city" id="city" required />
@@ -28,12 +89,13 @@
           
           {% if weather %}
           <div class="weather">
-            <h2>Current Weather in {{ weather.city }}:</h2>
+            <h3>Current Weather in {{ weather.city }}:</h3>
             <p>Temperature: {{ weather.temperature_f }}°C / {{ weather.temperature_f }}°F</p>
             <p>Feels Like: {{ weather.feels_like_c }}°C / {{ weather.feels_like_f }}°F</p>
             <p>Condition: {{ weather.condition }}</p>
             <p>Wind Speed: {{ weather.wind_speed_kph }} kph / {{ weather.wind_speed_mph }} mph </p>
           </div>
+
           {% for day in forecast %}
           <div class="forecast-item">
               <p class="date">{{ day.date }}</p>
@@ -54,66 +116,72 @@
       </div>
 
       <!-- Tab 2 -- fix the ui for this and the values -->
-      <div id="historical" class="tabcontent">
-        <h1>Historical Data (up to past 7 days)</h1>
-        <form method="POST" action='/historical'>
-          <label for="location">Enter City: </label>
-          <input type="text" id="location" name="location" value="{{ location }}" required>
-          <br><br>
-          
-          <label for="date">Pick Date: </label>
-          <input type="date" id="date" name="date" value="{{ date.strftime('%Y-%m-%d') if date else '' }}" required>
-          <br><br>
-          
-          <button type="submit">Get Historical Data</button>
-        </form>
-  
-        {% if date_valid %}
-          <p>{{ date_valid }}</p>
-        {% endif %}
-        {% if data %}
-          <h2>{{ location }} </h2>
-          <p><strong>Temperature:</strong> {{ data['forecast']['forecastday'][0]['day']['avgtemp_c'] }} °C</p>
-          <p><strong>Humidity:</strong> {{ data['forecast']['forecastday'][0]['day']['avghumidity'] }} %</p>
-          <p><strong>Condition:</strong> {{ data['forecast']['forecastday'][0]['day']['condition']['text'] }}</p>
-          <p><strong>Sunrise:</strong> {{ data['forecast']['forecastday'][0]['astro']['sunrise'] }}</p>
-          <p><strong>Sunset:</strong> {{ data['forecast']['forecastday'][0]['astro']['sunset'] }}</p>
-        {% elif error %}
-          <div class="error">
-            <p>{{ error }}</p>
-          </div>
-        {% endif %}
+      <div class='container'>
+        <div id="historical" class="tabcontent">
+          <h2>Historical Data (up to past 7 days)</h2>
+          <form method="POST" action='/historical'>
+            <label for="location">Enter City: </label>
+            <input type="text" id="location" name="location" value="{{ location }}" required>
+            
+            <label for="date">Pick Date: </label>
+            <input type="date" id="date" name="date" value="{{ date.strftime('%Y-%m-%d') if date else '' }}" required>
+            
+            <button type="submit">Get Historical Data</button>
+          </form>
+    
+          {% if date_valid %}
+            <p>{{ date_valid }}</p>
+          {% endif %}
+          {% if data %}
+            <h3>{{ location }} </h3>
+            <p><strong>Temperature:</strong> {{ data['forecast']['forecastday'][0]['day']['avgtemp_c'] }} °C</p>
+            <p><strong>Humidity:</strong> {{ data['forecast']['forecastday'][0]['day']['avghumidity'] }} %</p>
+            <p><strong>Condition:</strong> {{ data['forecast']['forecastday'][0]['day']['condition']['text'] }}</p>
+            <p><strong>Sunrise:</strong> {{ data['forecast']['forecastday'][0]['astro']['sunrise'] }}</p>
+            <p><strong>Sunset:</strong> {{ data['forecast']['forecastday'][0]['astro']['sunset'] }}</p>
+          {% elif error %}
+            <div class="error">
+              <p>{{ error }}</p>
+            </div>
+          {% endif %}
+        </div>
       </div>
 
-      <div id="multiple_cities_data" class="tabcontent">
-        <h1>Weather Globally</h1>
-        <form method="POST" action='/multiple_cities_data'>
-          <label for="city">Search for a city: </label>
-          <input type="text" name="city" id="city" required />
-          <button type="submit">Click to View</button>
-        </form>
-
-        
-
-        {% for city in cities %}
-          <h2>{{city['city']}}</h2>
-          <div>
-            <p>Temperature: {{ city.temperature_f }}°C / {{ city.temperature_f }}°F</p>
-            <p>Feels Like: {{ city.feels_like_c }}°C / {{ city.feels_like_f }}°F</p>
-            <p>Condition: {{ city.condition }}</p>
-            <p>Wind Speed: {{ city.wind_speed_kph }} kph / {{ city.wind_speed_mph }} mph </p>
+      <!-- Tab 3 -->
+      <div class='container'>
+        <div id="multiple_cities_data" class="tabcontent">
+          <h2>Weather Globally</h2>
+          <div class='form-flex'>
+            <form method="POST" action='/multiple_cities_data'>
+              <label for="city">Search for a city: </label>
+              <input type="text" name="city" id="city" required />
+              <button type="submit">Click to View</button>
+            </form>
+            <form method="GET" action='/save_weather_data_file'>
+              <button type="submit">Export to Txt File</button>
+            </form>
           </div>
-        {% endfor %}
+          
+          {% if invalid %}
+          <p> {{invalid}} </p>
+          {% endif %}
+          {% for city in cities %}
+            <h3>{{city['city']}}</h3>
+            <div>
+              <p>Temperature: {{ city.temperature_f }}°C / {{ city.temperature_f }}°F</p>
+              <p>Feels Like: {{ city.feels_like_c }}°C / {{ city.feels_like_f }}°F</p>
+              <p>Condition: {{ city.condition }}</p>
+              <p>Wind Speed: {{ city.wind_speed_kph }} kph / {{ city.wind_speed_mph }} mph </p>
+            </div>
+          {% endfor %}
 
-        <form method="GET" action='/save_weather_data_file'>
-          <button type="submit">Export to Txt File</button>
-        </form>
+          
+        </div>
       </div>
-
       
 
       <script>
-        function openTab(evt, tabName) {
+        function openTab(event, tabName) {
           var i, tabcontent, tablinks;
           tabcontent = document.getElementsByClassName("tabcontent");
           for (i = 0; i < tabcontent.length; i++) {
@@ -124,7 +192,7 @@
             tablinks[i].className = tablinks[i].className.replace(" active", "");
           }
           document.getElementById(tabName).style.display = "block";
-          evt.currentTarget.className += " active";
+          event.currentTarget.className += " active";
         }
       
         document.addEventListener("DOMContentLoaded", function() {

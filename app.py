@@ -1,17 +1,15 @@
 
 from turtle import down
-from flask import Flask, request, render_template, send_file
+from flask import Flask, request, render_template, send_file, session
 import requests
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
-
+app.secret_key = 'weatherapp'
 api_key = '92eae2a76e7041fe86800920250303'
 BASE_URL_CURRENT = 'http://api.weatherapi.com/v1/current.json'
 BASE_URL_FORECAST = 'http://api.weatherapi.com/v1/forecast.json'
 BASE_URL_HISTORICAL = 'https://api.weatherapi.com/v1/history.json'
-
-cities = []
 
 
 @app.route('/')
@@ -120,7 +118,7 @@ def historical():
 def multiple_cities_data():
     weather = None
     error = None
-
+    invalid = None
     if request.method == 'POST':
         city = request.form.get('city')
         err, data = get_response_data(BASE_URL_CURRENT, params={
@@ -128,10 +126,13 @@ def multiple_cities_data():
 
         if not err:
             error = data
+            invalid = 'User input city is invalid. Please ensure you enter a valid location.\nShowing previous weather data.'
         else:
             weather = get_current_weather_data(data, weather)
-            cities.append(weather)
-    return render_template('index.html', cities=cities, error=error, active_tab='multiple_cities_data')
+            if 'cities' not in session:
+                session['cities'] = []
+            session['cities'].append(weather)
+    return render_template('index.html', cities=session['cities'], invalid=invalid, error=error, active_tab='multiple_cities_data')
 
 
 @app.route('/save_weather_data_file', methods=['GET'])
@@ -140,12 +141,13 @@ def save_weather_data_file():
         output.write(f'Weather Data for {datetime.today()} Request')
         output.write(
             '\n------------------------------------------------------------------')
-        if cities:
-            for city in cities:
+        if session['cities']:
+            for city in session['cities']:
                 pass
                 output.write(
                     f"\n{city['city']}\nCurrent Temperature - {city['temperature_f']} F / {city['temperature_c']} C, Feels like - {city['feels_like_f']} F / {city['feels_like_c']} C, Condition - {city['condition']}, Wind Speed - {city['wind_speed_kph']} kph / {city['wind_speed_mph']} mph")
-
+        else:
+            output.write('\nNo weather data requested.')
     return send_file('weather_data.txt', as_attachment=True, download_name='weather_data.txt', mimetype='text/plain')
 
 
