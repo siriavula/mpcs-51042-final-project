@@ -72,7 +72,7 @@ def current_and_forecast():
     if request.method == 'POST':
         city = request.form.get('city')
         err, data = get_response_data(BASE_URL_FORECAST, params={
-            'key': api_key, 'q': city, 'days': 7})
+            'key': api_key, 'q': city, 'days': 3})
 
         if not err:
             error = data
@@ -104,7 +104,7 @@ def historical():
     data = None
     location = ''
     date = None
-    error = None
+    historical_error = None
     date_valid = None
     if request.method == 'POST':
         location = request.form.get('location')
@@ -124,11 +124,11 @@ def historical():
         err, response_data = get_response_data(BASE_URL_HISTORICAL, params={
             'key': api_key, 'q': location, 'dt': date.strftime('%Y-%m-%d')})
         if not err:
-            error = response_data
+            historical_error = response_data
         else:
             data = get_historical_data(response_data, weather)
 
-    return render_template('index.html', data=data, date_valid=date_valid, error=error, location=location, date=date, active_tab='historical')
+    return render_template('index.html', data=data, date_valid=date_valid, historical_error=historical_error, location=location, date=date, active_tab='historical')
 
 
 @app.route('/multiple_cities_data', methods=['GET', 'POST'])
@@ -146,10 +146,10 @@ def multiple_cities_data():
             invalid = 'User input city is invalid. Please ensure you enter a valid location.\nShowing previous weather data.'
         else:
             weather = get_current_weather_data(data, weather)
-            if 'cities' not in session:
-                session['cities'] = []
-            session['cities'].append(weather)
-    return render_template('index.html', cities=session['cities'], invalid=invalid, error=error, active_tab='multiple_cities_data')
+            if 'locations' not in session:
+                session['locations'] = []
+            session['locations'].append(weather)
+    return render_template('index.html', cities=session.get('locations', []), invalid=invalid, error=error, active_tab='multiple_cities_data')
 
 
 @app.route('/save_weather_data_file', methods=['GET'])
@@ -158,9 +158,8 @@ def save_weather_data_file():
         output.write(f'Weather Data for {datetime.today()} Request')
         output.write(
             '\n------------------------------------------------------------------')
-        if session['cities']:
-            for city in session['cities']:
-                pass
+        if session['locations']:
+            for city in session['locations']:
                 output.write(
                     f"\n{city['city']}\nCurrent Temperature - {city['temperature_f']} F / {city['temperature_c']} C, Feels like - {city['feels_like_f']} F / {city['feels_like_c']} C, Condition - {city['condition']}, Wind Speed - {city['wind_speed_kph']} kph / {city['wind_speed_mph']} mph")
         else:

@@ -93,7 +93,7 @@
       <!-- Tab 1 -->
       <div id="current_and_forecast" class="tabcontent">
         <div class="container">
-          <h2>Get Current Weather and Weekly Forecast</h2>
+          <h2>Get Current Weather and Forecast</h2>
           <form method="POST" action='/current_and_forecast'>
             <label for="city">Enter City:</label>
             <input type="text" name="city" id="city" required />
@@ -104,7 +104,7 @@
           <h3>Current Weather in {{ weather.city }}:</h3>
           <div class="forecast-container-one">
               <img src="https:{{ weather.condition_img }}" alt="Condition">
-              <h3>Temperature: {{ weather.temperature_f }}°C / {{ weather.temperature_f }}°F </h3>
+              <h3>Temperature: {{ weather.temperature_c }}°C / {{ weather.temperature_f }}°F </h3>
           </div>
           <div class="forecast-container-two">
             <p>Feels Like: {{ weather.feels_like_c }}°C / {{ weather.feels_like_f }}°F </p>
@@ -112,7 +112,7 @@
             <p>Wind Speed: {{ weather.wind_speed_kph }} kph / {{ weather.wind_speed_mph }} mph </p>
             <p>Humidity: {{ weather.humidity }} </p>
           </div>
-          <h2>Weekly Forecast</h2>
+          <h2>Forecast</h2>
           {% for day in forecast %}
           <p style="margin: 10px; font-size: 20px; color: #b87a83;" class="date">{{ day.date }}</p>
           <div class="forecast-container-one">
@@ -159,9 +159,9 @@
             <p><strong>Max:</strong> {{ data['max_temperature_c'] }}°C / {{ data['max_temperature_f'] }}°F</p>
             <p><strong>Min:</strong> {{ data['min_temperature_c'] }}°C / {{ data['min_temperature_f'] }}°F</p>
             <p><strong>Humidity:</strong> {{ data['humidity'] }}%</p>
-          {% elif error %}
+          {% elif historical_error %}
             <div class="error">
-              <p>{{ error }}</p>
+              <p>{{ historical_error }}</p>
             </div>
           {% endif %}
         </div>
@@ -186,17 +186,19 @@
           <p> {{invalid}} </p>
           {% endif %}
 
-          {% for city in cities %}
-            <h3>{{city['city']}}</h3>
-            <div>
-              <p>Temperature: {{ city.temperature_f }} C / {{ city.temperature_f }} F</p>
-              <p>Feels Like: {{ city.feels_like_c }} C / {{ city.feels_like_f }} F</p>
-              <p>Wind Speed: {{ city.wind_speed_kph }} kph / {{ city.wind_speed_mph }} mph </p>
-              <p>Condition: {{ city.condition }}</p>
-              <p>Wind Chill: {{ city.wind_chill_c }} C / {{ city.wind_chill_f }} F </p>
-              <p>Humidity: {{ city.humidity }}</p>
-            </div>
-          {% endfor %}
+          {% if cities %}
+            {% for city in cities %}
+              <h3>{{city['city']}}</h3>
+              <div>
+                <p>Temperature: {{ city.temperature_f }} C / {{ city.temperature_f }} F</p>
+                <p>Feels Like: {{ city.feels_like_c }} C / {{ city.feels_like_f }} F</p>
+                <p>Wind Speed: {{ city.wind_speed_kph }} kph / {{ city.wind_speed_mph }} mph </p>
+                <p>Condition: {{ city.condition }}</p>
+                <p>Wind Chill: {{ city.wind_chill_c }} C / {{ city.wind_chill_f }} F </p>
+                <p>Humidity: {{ city.humidity }}</p>
+              </div>
+            {% endfor %}
+          {% endif %}
 
           
         </div>
