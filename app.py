@@ -1,7 +1,8 @@
 
-from flask import Flask, request, render_template
+from turtle import down
+from flask import Flask, request, render_template, send_file
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -18,70 +19,74 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/tab1', methods=['GET', 'POST'])
-def tab1():
-    # current weather and forecast
-    # need to include hourly data for that day
-    # improve the UI
+def get_response_data(url, params):
+    response = requests.get(url, params=params)
+    response_data = response.json()
+
+    if response.status_code == 200:
+        return True, response_data
+    else:
+        return None, response_data.get('error', {}).get(
+            'message', 'Unknown error')
+
+
+def get_current_and_forecast_data(data, weather, forecast):
+    current_weather = data['current']
+    weather = {
+        'city': data['location']['name'],
+        'local_time': data['location']['localtime'],
+        'temperature_f': current_weather['temp_f'],
+        'temperature_c': current_weather['temp_c'],
+        'condition': current_weather['condition']['text'],
+        'wind_speed_kph': current_weather['wind_kph'],
+        'wind_speed_mph': current_weather['wind_mph'],
+        'feels_like_c': current_weather['feelslike_c'],
+        'feels_like_f': current_weather['feelslike_f'],
+    }
+
+    weather_forecast_day = data['forecast']['forecastday']
+    for day in weather_forecast_day:
+        date = day["date"]
+        max_temp = day["day"]["maxtemp_c"]
+        min_temp = day["day"]["mintemp_c"]
+        avg_temp = day["day"]["avgtemp_c"]
+        condition_text = day["day"]["condition"]["text"]
+        condition_icon = day["day"]["condition"]["icon"]
+        wind_speed = day["day"]["maxwind_kph"]
+        humidity = day["day"]["avghumidity"]
+
+        forecast.append({
+            "date": date,
+            "max_temp": max_temp,
+            "min_temp": min_temp,
+            "avg_temp": avg_temp,
+            "condition_text": condition_text,
+            "condition_icon": condition_icon,
+            "wind_speed": wind_speed,
+            "humidity": humidity,
+        })
+
+    return weather, forecast
+
+
+@app.route('/currentandforecast', methods=['GET', 'POST'])
+def currentandforecast():
     weather = None
     forecast = []
     error = None
 
     if request.method == 'POST':
         city = request.form.get('city')
+        err, data = get_response_data(BASE_URL_FORECAST, params={
+            'key': api_key, 'q': city, 'days': 7})
 
-        params_current = {
-            'key': api_key,
-            'q': city,
-            'days': 7,
-            'aqi': 'no'
-        }
-
-        response = requests.get(BASE_URL_FORECAST, params=params_current)
-        response_data = response.json()
-
-        if response.status_code == 200:
-            current_weather = response_data['current']
-
-            weather = {
-                'city': response_data['location']['name'],
-                'local_time': response_data['location']['localtime'],
-                'temperature_f': current_weather['temp_f'],
-                'temperature_c': current_weather['temp_c'],
-                'condition': current_weather['condition']['text'],
-                'wind_speed_kph': current_weather['wind_kph'],
-                'wind_speed_mph': current_weather['wind_mph'],
-                'feels_like_c': current_weather['feelslike_c'],
-                'feels_like_f': current_weather['feelslike_f'],
-            }
-
-            # CHANGE
-            weather_forecast_day = response_data['forecast']['forecastday']
-            for day in weather_forecast_day:
-                date = day["date"]
-                max_temp = day["day"]["maxtemp_c"]
-                min_temp = day["day"]["mintemp_c"]
-                avg_temp = day["day"]["avgtemp_c"]
-                condition_text = day["day"]["condition"]["text"]
-                condition_icon = day["day"]["condition"]["icon"]
-                wind_speed = day["day"]["maxwind_kph"]
-                humidity = day["day"]["avghumidity"]
-
-                forecast.append({
-                    "date": date,
-                    "max_temp": max_temp,
-                    "min_temp": min_temp,
-                    "avg_temp": avg_temp,
-                    "condition_text": condition_text,
-                    "condition_icon": condition_icon,
-                    "wind_speed": wind_speed,
-                    "humidity": humidity,
-                })
+        if not err:
+            error = data
         else:
-            error = response_data.get('error', {}).get(
-                'message', 'Unknown error')
+            weather, forecast = get_current_and_forecast_data(
+                data, weather, forecast)
 
-    return render_template('index.html', weather=weather, forecast=forecast, error=error, active_tab='Tab1')
+    return render_template('index.html', weather=weather, forecast=forecast, error=error, active_tab='currentandforecast')
 
 
 @app.route('/tab2', methods=['GET', 'POST'])
@@ -113,15 +118,15 @@ def tab3():
 
     if request.method == 'POST':
         city = request.form.get('city')
-        response = requests.get(BASE_URL_FORECAST, params={
+        response = requests.get(BASE_URL_CURRENT, params={
                                 'key': api_key, 'q': city, })
-        response_data = response.json()
+        data = response.json()
 
         if response.status_code == 200:
-            current_weather = response_data['current']
+            current_weather = data['current']
             weather = {
-                'city': response_data['location']['name'],
-                'local_time': response_data['location']['localtime'],
+                'city': data['location']['name'],
+                'local_time': data['location']['localtime'],
                 'temperature_f': current_weather['temp_f'],
                 'temperature_c': current_weather['temp_c'],
                 'condition': current_weather['condition']['text'],
@@ -132,9 +137,24 @@ def tab3():
             }
             cities.append(weather)
         else:
-            error = response_data.get('error', {}).get(
+            error = data.get('error', {}).get(
                 'message', 'error unknown')
     return render_template('index.html', cities=cities, error=error, active_tab='Tab3')
+
+
+@app.route('/save_weather_data_file', methods=['GET'])
+def save_weather_data_file():
+    with open('weather_data.txt', 'w') as output:
+        output.write(f'Weather Data for {datetime.today()} Request')
+        output.write(
+            '\n------------------------------------------------------------------')
+        if cities:
+            for city in cities:
+                pass
+                output.write(
+                    f"\n{city['city']}\nCurrent Temperature - {city['temperature_f']} F / {city['temperature_c']} C, Feels like - {city['feels_like_f']} F / {city['feels_like_c']} C, Condition - {city['condition']}, Wind Speed - {city['wind_speed_kph']} kph / {city['wind_speed_mph']} mph")
+
+    return send_file('weather_data.txt', as_attachment=True, download_name='weather_data.txt', mimetype='text/plain')
 
 
 if __name__ == '__main__':

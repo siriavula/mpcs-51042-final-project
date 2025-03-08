@@ -8,8 +8,8 @@
   <body>
     <h1>Weather</h1>
       <div class="tab">
-        <button class="tablinks" onclick="openTab(event, 'Tab1')" 
-          {% if active_tab == 'Tab1' %} class="active" {% endif %}>Weather</button>
+        <button class="tablinks" onclick="openTab(event, 'currentandforecast')" 
+          {% if active_tab == 'currentandforecast' %} class="active" {% endif %}>Weather</button>
         <button class="tablinks" onclick="openTab(event, 'Tab2')" 
           {% if active_tab == 'Tab2' %} class="active" {% endif %}>Historical</button>
         <button class="tablinks" onclick="openTab(event, 'Tab3')" 
@@ -17,10 +17,10 @@
       </div>
 
 
-      <div id="Tab1" class="tabcontent">
+      <div id="currentandforecast" class="tabcontent">
         <div class="container">
     
-          <form method="POST" action='/tab1'>
+          <form method="POST" action='/currentandforecast'>
             <label for="city">Enter City:</label>
             <input type="text" name="city" id="city" required />
             <button type="submit">Get Current Weather</button>
@@ -87,6 +87,8 @@
           <button type="submit">Click to View</button>
         </form>
 
+        
+
         {% for city in cities %}
           <h2>{{city['city']}}</h2>
           <div>
@@ -97,7 +99,12 @@
           </div>
         {% endfor %}
 
+        <form method="GET" action='/save_weather_data_file'>
+          <button type="submit">Export to Txt File</button>
+        </form>
       </div>
+
+      
 
       <script>
         function openTab(evt, tabName) {
@@ -115,7 +122,7 @@
         }
       
         document.addEventListener("DOMContentLoaded", function() {
-          const activeTab = "{{ active_tab if active_tab else 'Tab1' }}"; 
+          const activeTab = "{{ active_tab if active_tab else 'currentandforecast' }}"; 
           const event = { currentTarget: document.querySelector(`.tablinks[onclick="openTab(event, '${activeTab}')"]`) };
           openTab(event, activeTab);
         });
