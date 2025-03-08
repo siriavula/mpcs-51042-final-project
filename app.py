@@ -2,7 +2,7 @@
 from turtle import down
 from flask import Flask, request, render_template, send_file
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
@@ -106,13 +106,19 @@ def historical():
     location = ''
     date = None
     error = None
-
+    date_valid = None
     if request.method == 'POST':
         location = request.form.get('location')
         date_str = request.form.get('date')
 
         if date_str:
             date = datetime.strptime(date_str, '%Y-%m-%d')
+            today = datetime.today()
+            one_week_ago = today - timedelta(days=7)
+
+            if date > datetime.today() or date < one_week_ago:
+                date_valid = 'User input date is an invalid input. Please ensure the date you enter is within the past 7 days.\nShowing weather data for today.'
+                date = datetime.today()
         else:
             date = datetime.today()
 
@@ -123,7 +129,7 @@ def historical():
         else:
             data = response_data
 
-    return render_template('index.html', data=data, error=error, location=location, date=date, active_tab='historical')
+    return render_template('index.html', data=data, date_valid=date_valid, error=error, location=location, date=date, active_tab='historical')
 
 
 @app.route('/tab3', methods=['GET', 'POST'])

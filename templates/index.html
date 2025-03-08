@@ -68,7 +68,9 @@
           <button type="submit">Get Historical Data</button>
         </form>
   
-
+        {% if date_valid %}
+          <p>{{ date_valid }}</p>
+        {% endif %}
         {% if data %}
           <h2>{{ location }} </h2>
           <p><strong>Temperature:</strong> {{ data['forecast']['forecastday'][0]['day']['avgtemp_c'] }} °C</p>
