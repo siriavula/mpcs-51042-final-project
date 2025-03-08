@@ -1,4 +1,0 @@
-Weather Data for 2025-03-07 23:08:35.532768 Request
-------------------------------------------------------------------
-Chicago
-Current Temperature - 35.1 F / 1.7 C, Feels like - 29.3 F / -1.5 C, Condition - Mist, Wind Speed - 10.8 kph / 6.7 mph

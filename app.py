@@ -1,5 +1,3 @@
-
-from turtle import down
 from flask import Flask, request, render_template, send_file, session
 import requests
 from datetime import datetime, timedelta
