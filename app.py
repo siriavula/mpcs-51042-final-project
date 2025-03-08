@@ -89,11 +89,23 @@ def currentandforecast():
     return render_template('index.html', weather=weather, forecast=forecast, error=error, active_tab='currentandforecast')
 
 
-@app.route('/tab2', methods=['GET', 'POST'])
-def tab2():
+def get_iresponse_data(url, params):
+    response = requests.get(url, params=params)
+    response_data = response.json()
+
+    if response.status_code == 200:
+        return True, response_data
+    else:
+        return None, response_data.get('error', {}).get(
+            'message', 'Unknown error')
+
+
+@app.route('/historical', methods=['GET', 'POST'])
+def historical():
     data = None
     location = ''
     date = None
+    error = None
 
     if request.method == 'POST':
         location = request.form.get('location')
@@ -104,11 +116,14 @@ def tab2():
         else:
             date = datetime.today()
 
-        response = requests.get(BASE_URL_HISTORICAL, params={
+        err, response_data = get_response_data(BASE_URL_HISTORICAL, params={
             'key': api_key, 'q': location, 'dt': date.strftime('%Y-%m-%d')})
-        data = response.json()
+        if not err:
+            error = response_data
+        else:
+            data = response_data
 
-    return render_template('index.html', data=data, location=location, date=date, active_tab='Tab2')
+    return render_template('index.html', data=data, error=error, location=location, date=date, active_tab='historical')
 
 
 @app.route('/tab3', methods=['GET', 'POST'])

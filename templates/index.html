@@ -10,13 +10,13 @@
       <div class="tab">
         <button class="tablinks" onclick="openTab(event, 'currentandforecast')" 
           {% if active_tab == 'currentandforecast' %} class="active" {% endif %}>Weather</button>
-        <button class="tablinks" onclick="openTab(event, 'Tab2')" 
-          {% if active_tab == 'Tab2' %} class="active" {% endif %}>Historical</button>
+        <button class="tablinks" onclick="openTab(event, 'historical')" 
+          {% if active_tab == 'historical' %} class="active" {% endif %}>Historical</button>
         <button class="tablinks" onclick="openTab(event, 'Tab3')" 
           {% if active_tab == 'Tab3' %} class="active" {% endif %}>Multiple Cities</button>
       </div>
 
-
+      <!-- Tab 1 -->
       <div id="currentandforecast" class="tabcontent">
         <div class="container">
     
@@ -53,10 +53,10 @@
         </div>
       </div>
 
-      
-      <div id="Tab2" class="tabcontent">
+      <!-- Tab 2 -- fix the ui for this and the values -->
+      <div id="historical" class="tabcontent">
         <h1>Historical Data (up to past 7 days)</h1>
-        <form method="POST" action='/tab2'>
+        <form method="POST" action='/historical'>
           <label for="location">Enter City: </label>
           <input type="text" id="location" name="location" value="{{ location }}" required>
           <br><br>
@@ -76,6 +76,10 @@
           <p><strong>Condition:</strong> {{ data['forecast']['forecastday'][0]['day']['condition']['text'] }}</p>
           <p><strong>Sunrise:</strong> {{ data['forecast']['forecastday'][0]['astro']['sunrise'] }}</p>
           <p><strong>Sunset:</strong> {{ data['forecast']['forecastday'][0]['astro']['sunset'] }}</p>
+        {% elif error %}
+          <div class="error">
+            <p>{{ error }}</p>
+          </div>
         {% endif %}
       </div>
 
