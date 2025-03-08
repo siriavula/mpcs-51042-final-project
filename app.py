@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, send_file, session
+from flask import Flask, request, render_template, send_file, session, redirect, url_for
 import requests
 from datetime import datetime, timedelta
 
@@ -136,6 +136,8 @@ def multiple_cities_data():
     weather = None
     error = None
     invalid = None
+    if 'cities' not in session:
+        session['cities'] = []
     if request.method == 'POST':
         city = request.form.get('city')
         err, data = get_response_data(BASE_URL_CURRENT, params={
@@ -146,10 +148,9 @@ def multiple_cities_data():
             invalid = 'User input city is invalid. Please ensure you enter a valid location.\nShowing previous weather data.'
         else:
             weather = get_current_weather_data(data, weather)
-            if 'locations' not in session:
-                session['locations'] = []
-            session['locations'].append(weather)
-    return render_template('index.html', cities=session.get('locations', []), invalid=invalid, error=error, active_tab='multiple_cities_data')
+            session['cities'].append(weather)
+            session.modified = True
+    return render_template('index.html', cities=session['cities'], invalid=invalid, error=error, active_tab='multiple_cities_data')
 
 
 @app.route('/save_weather_data_file', methods=['GET'])
@@ -158,13 +159,20 @@ def save_weather_data_file():
         output.write(f'Weather Data for {datetime.today()} Request')
         output.write(
             '\n------------------------------------------------------------------')
-        if session['locations']:
-            for city in session['locations']:
+        if session['cities']:
+            for city in session['cities']:
                 output.write(
                     f"\n{city['city']}\nCurrent Temperature - {city['temperature_f']} F / {city['temperature_c']} C, Feels like - {city['feels_like_f']} F / {city['feels_like_c']} C, Condition - {city['condition']}, Wind Speed - {city['wind_speed_kph']} kph / {city['wind_speed_mph']} mph")
         else:
             output.write('\nNo weather data requested.')
     return send_file('weather_data.txt', as_attachment=True, download_name='weather_data.txt', mimetype='text/plain')
+
+
+@app.route('/clear_weather_data', methods=['GET'])
+def clear_weather_data():
+    session['cities'] = []
+    session.modified = True
+    return redirect(url_for('multiple_cities_data'))
 
 
 if __name__ == '__main__':

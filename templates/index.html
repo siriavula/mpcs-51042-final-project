@@ -180,6 +180,10 @@
             <form method="GET" action='/save_weather_data_file'>
               <button type="submit">Export to Txt File</button>
             </form>
+            <form action = "{{ '/clear_weather_data' }}" method = "get" > 
+              <button type = "submit" > Clear Weather Data </button> 
+            </form >
+
           </div>
           
           {% if invalid %}
